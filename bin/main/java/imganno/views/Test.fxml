@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.imganno.controller.TestController">
+   <children>
+      <HBox prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane fx:id="hostPane" prefHeight="200.0" prefWidth="300.0">
+               <children>
+                  <ImageView fx:id="imagePane" fitHeight="1060.0" fitWidth="940.0" layoutX="50.0" layoutY="125.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+               </children>
+            </AnchorPane>
+            <VBox alignment="TOP_CENTER" prefHeight="1080.0" prefWidth="960.0">
+               <children>
+                  <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Comments">
+                     <VBox.margin>
+                        <Insets bottom="15.0" top="15.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="25.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="commentField" alignment="TOP_LEFT" prefHeight="300.0" prefWidth="300.0" style="-fx-padding: 5; -fx-border-insets: 5; -fx-background-insets: 5;">
+                     <VBox.margin>
+                        <Insets left="60.0" right="60.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="5.0" />
+                     </padding>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+                  <Button alignment="CENTER" mnemonicParsing="false" onAction="#saveChanges" text="Save Changes">
+                     <VBox.margin>
+                        <Insets top="50.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#discardChanges" text="Discard Unsaved Changes">
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#deleteAnnotation" text="Delete Annotation">
+                     <VBox.margin>
+                        <Insets top="150.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#loadImage" text="Load Image">
+                     <VBox.margin>
+                        <Insets top="150.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

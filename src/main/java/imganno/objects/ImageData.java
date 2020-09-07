@@ -6,15 +6,11 @@ import javafx.scene.image.Image;
 
 public class ImageData {
 	private final Image image;	
-	private final int width;
-	private final int height;
 	
 	public ArrayList<Annotation> annotations;
 	
 	public ImageData(Image image) {
 		this.image = image;
-		this.width = (int) image.getWidth();
-		this.height = (int) image.getHeight();
 		this.annotations = new ArrayList<>();
 	}
 
@@ -23,10 +19,10 @@ public class ImageData {
 	}
 
 	public int getWidth() {
-		return width;
+		return (int) image.getWidth();
 	}
 
 	public int getHeight() {
-		return height;
+		return (int) image.getHeight();
 	}
 }

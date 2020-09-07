@@ -15,7 +15,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import main.java.imganno.App;
@@ -37,8 +39,8 @@ public class TestController {
 	private Annotation currAnnotation;
 	private ArrayList<Annotation> annotations;
 	
-	private boolean ctrlPressed = false;
-	
+	private Rectangle clip;
+		
 	public TestController() {		
 		this.annotations = new ArrayList<>();
 		
@@ -57,21 +59,6 @@ public class TestController {
 		currAnnotation = a;
 	}
 	
-	EventHandler<KeyEvent> ctrlPressedHandler = new EventHandler<KeyEvent>() {
-
-		@Override
-		public void handle(KeyEvent event) {
-			//System.out.println("ctrl down");
-			
-			if(event.getCode() == KeyCode.CONTROL && !ctrlPressed) {
-				ctrlPressed = true;
-			} else {
-				ctrlPressed = false;
-			}
-		}
-		
-	};
-	
 	EventHandler<MouseEvent> annotationHandler = new EventHandler<MouseEvent>() {
 
 		@Override
@@ -83,7 +70,7 @@ public class TestController {
 				setCurrAnnotation(a);
 				event.consume();
 			}
-			else if (!ctrlPressed){
+			else if (!event.isControlDown()){
 				
 				a.setX(event.getSceneX()-a.getWidth()/2-a.getTranslateX());
 				a.setY(event.getSceneY()-a.getHeight()/2-a.getTranslateY());
@@ -96,20 +83,23 @@ public class TestController {
 	
 	@FXML public void initialize() {
 		
-		pane.setOnKeyPressed(ctrlPressedHandler);
-		pane.setOnKeyReleased(ctrlPressedHandler);
-		
 		pane.setOnMousePressed(new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent event) {
 				//only reason we should be clicking on this pane itself instead of a annotation is to create a new one
-				if(ctrlPressed && imageData != null) {
+				if(event.isControlDown() && imageData != null) {
 					Annotation a = new Annotation("", event.getSceneX(), event.getSceneY());
 					hostPane.getChildren().add(a);
 					a.toFront();
 					a.setOnMousePressed(annotationHandler);
 					a.setOnMouseDragged(annotationHandler);
+//					a.setOnMouseEntered(e -> {
+//						mouseInBounds = true;
+//					});
+//					a.setOnMouseExited(e -> {
+//						mouseInBounds = false;
+//					});
 					setCurrAnnotation(a);
 					annotations.add(a);
 				}
@@ -122,7 +112,7 @@ public class TestController {
 			@Override
 			public void handle(MouseEvent event) {
 				//this should only ever happen after we created a new annotation and set it to currannotation, so resize that
-				if(currAnnotation != null && ctrlPressed && imageData != null) {
+				if(currAnnotation != null && event.isControlDown() && imageData != null) {
 					double x = currAnnotation.getX();
 					double y = currAnnotation.getY();
 					
@@ -176,11 +166,18 @@ public class TestController {
 	}
 	
 	@FXML private void loadImage(ActionEvent ae) throws FileNotFoundException {
+		for(Annotation a : annotations) {
+			hostPane.getChildren().remove(a);
+		}
+		annotations = new ArrayList<>();
 		imageFile = fc.showOpenDialog(App.getPrimaryStage());
 		imageData = new ImageData(new Image(new FileInputStream(imageFile.getPath())));
 		
 		//TODO: load annotations
 		
 		imagePane.setImage(imageData.getImage());
+		
+		clip = new Rectangle(imagePane.getFitWidth(), imagePane.getFitHeight());
+		hostPane.setClip(clip);
 	}
 }

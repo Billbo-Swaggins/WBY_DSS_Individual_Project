@@ -89,6 +89,9 @@ public class TestController {
 			public void handle(MouseEvent event) {
 				//only reason we should be clicking on this pane itself instead of a annotation is to create a new one
 				if(event.isControlDown() && imageData != null) {
+					if(!annotations.contains(currAnnotation)) {
+						hostPane.getChildren().remove(currAnnotation);
+					}
 					Annotation a = new Annotation("", event.getSceneX(), event.getSceneY());
 					hostPane.getChildren().add(a);
 					a.toFront();
@@ -101,7 +104,6 @@ public class TestController {
 //						mouseInBounds = false;
 //					});
 					setCurrAnnotation(a);
-					annotations.add(a);
 				}
 			}
 			
@@ -154,8 +156,9 @@ public class TestController {
 		
 	}
 	
-	@FXML private void saveAnnotation(ActionEvent ae) {
+	@FXML private void createAnnotation(ActionEvent ae) {
 		currAnnotation.comment = commentField.getText();
+		annotations.add(currAnnotation);
 	}
 	
 	@FXML private void deleteAnnotation(ActionEvent ae) {

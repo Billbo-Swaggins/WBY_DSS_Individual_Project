@@ -40,7 +40,7 @@
                         <Insets />
                      </opaqueInsets>
                   </TextField>
-                  <Button mnemonicParsing="false" onAction="#saveAnnotation" text="Save Annotation">
+                  <Button mnemonicParsing="false" onAction="#createAnnotation" text="Save Annotation">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>

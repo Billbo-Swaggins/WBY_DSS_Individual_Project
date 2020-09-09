@@ -3,6 +3,12 @@ package main.java.imganno.controller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -162,8 +168,39 @@ public class TestController {
 		});
 	}
 	
+	private void saveAnnotationstoDisk() {
+		//file name will be imagefilename_creationdate.csv
+		if(imageData != null && imageFile != null) {
+			
+			Path imagePath = Paths.get(imageFile.getAbsolutePath());
+			BasicFileAttributes attr;
+			try {
+				attr = Files.readAttributes(imagePath, BasicFileAttributes.class);
+				File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), attr.creationTime()));
+				//System.out.println(f.getAbsolutePath());
+				
+				FileWriter fw = new FileWriter(f);
+				for (Annotation a : annotations) {
+					fw.write(String.format("%s,%s,%s,%s,%s,%s,%s\n",
+							a.comment, a.getX(), a.getY(), a.getWidth(), a.getHeight(),
+							a.getTranslateX(), a.getTranslateY()));
+				}
+				fw.close();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	private void loadAnnotationsfromDisk() {
+		
+	}
+	
 	@FXML private void saveChanges(ActionEvent ae) {
 		//go through all annotations and save them as individual text files to internal directory
+		saveAnnotationstoDisk();
 	}
 	
 	@FXML private void discardChanges(ActionEvent ae) {
@@ -208,15 +245,11 @@ public class TestController {
 				ButtonType nosaveClose = new ButtonType("Don't Save");
 				ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 				
-//				((Button) pu.getDialogPane().lookupButton(saveClose)).setPrefWidth(Region.USE_COMPUTED_SIZE);
-//				((Button) pu.getDialogPane().lookupButton(nosaveClose)).setPrefWidth(Region.USE_COMPUTED_SIZE);
-
-				
 				pu.getButtonTypes().setAll(saveClose, nosaveClose, cancel);
 				
 				ButtonType result = pu.showAndWait().get();
 				if (result == saveClose) {
-					//save all annotations to disk
+					saveAnnotationstoDisk();
 					Platform.exit();
 				}
 				else if (result == nosaveClose) {
@@ -236,7 +269,7 @@ public class TestController {
 		imageFile = fc.showOpenDialog(App.getPrimaryStage());
 		
 		if(imageFile != null) {
-			imageData = new ImageData(new Image(new FileInputStream(imageFile.getPath())));
+			imageData = new ImageData(imageFile, new Image(new FileInputStream(imageFile.getPath())));
 			
 			//TODO: load annotations
 			

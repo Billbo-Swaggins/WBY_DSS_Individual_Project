@@ -10,32 +10,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.Scanner;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
-import javafx.stage.Popup;
 import javafx.stage.FileChooser.ExtensionFilter;
 import main.java.imganno.App;
 import main.java.imganno.objects.Annotation;
@@ -47,6 +41,14 @@ public class TestController {
 	@FXML private AnchorPane hostPane;
 	@FXML private ImageView imagePane;
 	@FXML private TextField commentField;
+	
+	@FXML private Label instructions;
+	
+	@FXML private Button createAnnoButton;
+	@FXML private Button saveAnnoButton;
+	@FXML private Button deleteAnnoButton;
+	@FXML private Button saveChangesButton;
+	@FXML private Button deleteChangesButton;
 		
 	private FileChooser fc;
 	
@@ -72,9 +74,18 @@ public class TestController {
 		creating = false;
 	}
 	
+	private void toggleButtons(boolean bool) {
+		saveAnnoButton.setDisable(!bool);
+		deleteAnnoButton.setDisable(!bool);
+		
+		//commentField should only be editable when these are enabled and vice versa
+		commentField.setEditable(bool);
+	}
+	
 	private void setCurrAnnotation(Annotation a) {
 		if(currAnnotation != null) {
 			currAnnotation.setStroke(Paint.valueOf("black"));
+			commentField.setText("");
 		}
 		if(a != null) {
 			a.setStroke(Paint.valueOf("red"));
@@ -92,6 +103,7 @@ public class TestController {
 			//System.out.println("moused pressed on annotation");
 			if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
 				if(!creating) setCurrAnnotation(a);
+				deleteAnnoButton.setDisable(false);
 				event.consume();
 			}
 			else if (!event.isControlDown() && creating){	
@@ -105,6 +117,12 @@ public class TestController {
 	
 	@FXML public void initialize() {
 	
+		instructions.setText("Instructions:\n"+
+							"Left click on an annotation to select it\n"+
+							"To create an annotation, click 'Create Annotation'\n"+
+							"Ctrl+Left Click : Spawn annotation squares\n"+
+							"Ctrl+Left Click+Drag : Resize annotation square\n"+
+							"Left Click+Drag : Move annotation square\n");
 		
 		pane.setOnMousePressed(new EventHandler<MouseEvent>() {
 
@@ -166,6 +184,11 @@ public class TestController {
 			}
 			
 		});
+		
+		toggleButtons(false);
+		createAnnoButton.setDisable(true);
+		saveChangesButton.setDisable(true);
+		deleteChangesButton.setDisable(true);
 	}
 	
 	private void saveAnnotationstoDisk() {
@@ -176,6 +199,8 @@ public class TestController {
 			BasicFileAttributes attr;
 			try {
 				attr = Files.readAttributes(imagePath, BasicFileAttributes.class);
+				File dir = new File("image_data/");
+				dir.mkdir();
 				File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), attr.creationTime()));
 				//System.out.println(f.getAbsolutePath());
 				
@@ -195,7 +220,48 @@ public class TestController {
 	}
 	
 	private void loadAnnotationsfromDisk() {
-		
+		Path imagePath = Paths.get(imageFile.getAbsolutePath());
+		BasicFileAttributes attr;
+		try {
+			attr = Files.readAttributes(imagePath, BasicFileAttributes.class);
+			File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), attr.creationTime()));
+
+			if(f.exists()) {
+				Scanner s = new Scanner(f);
+				while(s.hasNextLine()) {
+					String data[] = s.nextLine().split(",");
+					Annotation a = new Annotation(data[0],
+							Double.valueOf(data[1]),
+							Double.valueOf(data[2]));
+					
+					a.setWidth(Double.valueOf(data[3]));
+					a.setHeight(Double.valueOf(data[4]));
+					a.setTranslateX(Double.valueOf(data[5]));
+					a.setTranslateY(Double.valueOf(data[6]));
+					
+					hostPane.getChildren().add(a);
+					a.toFront();
+					a.setOnMousePressed(annotationHandler);
+					a.setOnMouseDragged(annotationHandler);
+					
+					annotations.add(a);
+				}
+			} else {
+				System.out.println("File not found");
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void clearCurrData(Annotation[] alist) {
+		for(Annotation a : alist) {
+			hostPane.getChildren().remove(a);
+			annotations.remove(a);
+		}
+		setCurrAnnotation(null);
+		commentField.setText("");
 	}
 	
 	@FXML private void saveChanges(ActionEvent ae) {
@@ -204,31 +270,40 @@ public class TestController {
 	}
 	
 	@FXML private void discardChanges(ActionEvent ae) {
-		
+		Annotation[] alist = new Annotation[annotations.size()];
+		alist = annotations.toArray(alist);
+		clearCurrData(alist);
+		loadAnnotationsfromDisk();
 	}
 	
 	@FXML private void createAnnotation(ActionEvent ae) {
+		createAnnoButton.setDisable(true);
+		toggleButtons(true);
 		setCurrAnnotation(null);
 		creating = true;
 	}
 	
 	@FXML private void saveAnnotation(ActionEvent ae) {
+		createAnnoButton.setDisable(false);
 		if(currAnnotation != null) {
 			currAnnotation.comment = commentField.getText();
 			annotations.add(currAnnotation);
 		}
 		creating = false;
-		setCurrAnnotation(null);
+		toggleButtons(false);
+		deleteAnnoButton.setDisable(false);
 	}
 	
 	@FXML private void deleteAnnotation(ActionEvent ae) {
+		createAnnoButton.setDisable(false);
 		commentField.setText("");
+		Annotation[] alist = new Annotation[0];
 		if(currAnnotation != null) {
-			annotations.remove(currAnnotation);
-			hostPane.getChildren().remove(currAnnotation);
+			alist = new Annotation[] {currAnnotation};
 		}
-		setCurrAnnotation(null);
+		clearCurrData(alist);
 		creating = false;
+		toggleButtons(false);
 	}
 	
 	@FXML private void loadImage(ActionEvent ae) throws FileNotFoundException {
@@ -260,18 +335,22 @@ public class TestController {
 				}
 				
 			});
+			
+			createAnnoButton.setDisable(false);
+			saveChangesButton.setDisable(false);
+			deleteChangesButton.setDisable(false);
 		}
 		
-		for(Annotation a : annotations) {
-			hostPane.getChildren().remove(a);
-		}
-		annotations = new ArrayList<>();
+		Annotation[] alist = new Annotation[annotations.size()];
+		alist = annotations.toArray(alist);
+		clearCurrData(alist);
+		
 		imageFile = fc.showOpenDialog(App.getPrimaryStage());
 		
 		if(imageFile != null) {
 			imageData = new ImageData(imageFile, new Image(new FileInputStream(imageFile.getPath())));
 			
-			//TODO: load annotations
+			loadAnnotationsfromDisk();
 			
 			imagePane.setImage(imageData.getImage());
 			

@@ -40,23 +40,28 @@
                         <Insets />
                      </opaqueInsets>
                   </TextField>
-                  <Button mnemonicParsing="false" onAction="#createAnnotation" text="Create Annotation" />
-                  <Button mnemonicParsing="false" onAction="#saveAnnotation" text="Save Annotation">
+                  <Label fx:id="instructions" alignment="CENTER" text="Instructions:" textAlignment="JUSTIFY" wrapText="true">
+                     <VBox.margin>
+                        <Insets bottom="30.0" top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Button fx:id="createAnnoButton" mnemonicParsing="false" onAction="#createAnnotation" text="Create Annotation" />
+                  <Button fx:id="saveAnnoButton" mnemonicParsing="false" onAction="#saveAnnotation" text="Save Annotation">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#deleteAnnotation" text="Delete Annotation">
+                  <Button fx:id="deleteAnnoButton" mnemonicParsing="false" onAction="#deleteAnnotation" text="Delete Annotation">
                      <VBox.margin>
                         <Insets bottom="150.0" top="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Button alignment="CENTER" mnemonicParsing="false" onAction="#saveChanges" text="Save All Changes">
+                  <Button fx:id="saveChangesButton" alignment="CENTER" mnemonicParsing="false" onAction="#saveChanges" text="Save All Changes">
                      <VBox.margin>
                         <Insets top="50.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#discardChanges" text="Discard All Unsaved Changes">
+                  <Button fx:id="deleteChangesButton" mnemonicParsing="false" onAction="#discardChanges" text="Discard All Unsaved Changes">
                      <VBox.margin>
                         <Insets top="5.0" />
                      </VBox.margin>

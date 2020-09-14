@@ -2,21 +2,28 @@ package main.java.imganno.objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
 
 import javafx.scene.image.Image;
 
-
 public class TestImageData {
 	
-//	@Test
-//	void testConstruction() {
-//		Image image = new Image("https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png");
-//		ImageData imgdata = new ImageData(image);
-//		
-//		assertEquals(272, imgdata.getWidth());
-//		assertEquals(92, imgdata.getHeight());
-//		assertEquals(image, imgdata.getImage());
-//	}
+	@Test
+	public void testConstructor() {
+		File f = new File("temp");
+		Image i = Mockito.mock(Image.class);
+		ImageData id = Mockito.spy(new ImageData(f, i));
+		
+		when(id.getWidth()).thenReturn(10);
+		when(id.getHeight()).thenReturn(20);
+		
+		assertEquals(id.getImage(), i);
+		assertEquals(id.getWidth(), 10);
+		assertEquals(id.getHeight(), 20);
+	}
+
 }

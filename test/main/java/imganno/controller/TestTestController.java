@@ -45,7 +45,6 @@ public class TestTestController extends ApplicationTest {
 	private Parent sceneRoot;
 	
 	private Stage stage;
-	
 	private File f;
 
 	@Mock FileChooser fc;

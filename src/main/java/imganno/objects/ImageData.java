@@ -23,11 +23,11 @@ public class ImageData {
 		return image;
 	}
 
-	public int getWidth() {
-		return (int) image.getWidth();
+	public double getWidth() {
+		return image.getWidth();
 	}
 
-	public int getHeight() {
-		return (int) image.getHeight();
+	public double getHeight() {
+		return image.getHeight();
 	}
 }

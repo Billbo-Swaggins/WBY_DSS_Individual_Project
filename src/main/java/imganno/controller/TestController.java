@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -31,6 +32,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.WindowEvent;
 import main.java.imganno.App;
 import main.java.imganno.objects.Annotation;
 import main.java.imganno.objects.ImageData;
@@ -40,30 +42,47 @@ public class TestController {
 	@FXML private AnchorPane pane;
 	@FXML private AnchorPane hostPane;
 	@FXML private ImageView imagePane;
-	@FXML private TextField commentField;
+	@FXML TextField commentField;
 	
-	@FXML private Label instructions;
+	@FXML Label instructions;
 	
-	@FXML private Button createAnnoButton;
-	@FXML private Button saveAnnoButton;
-	@FXML private Button deleteAnnoButton;
-	@FXML private Button saveChangesButton;
-	@FXML private Button deleteChangesButton;
+	@FXML Button createAnnoButton;
+	@FXML Button saveAnnoButton;
+	@FXML Button deleteAnnoButton;
+	@FXML Button saveChangesButton;
+	@FXML Button deleteChangesButton;
+	@FXML Button loadImageButton;
 		
-	private FileChooser fc;
+	FileChooser fc;
 	
-	private File imageFile;
-	private ImageData imageData;
+	File imageFile;
+	ImageData imageData;
 	
 	private Annotation currAnnotation;
-	private ArrayList<Annotation> annotations;
+	ArrayList<Annotation> annotations;
 	
 	private Rectangle clip;
 	
 	private boolean first;
 	private boolean creating;
+	
+	boolean getCreating() {
+		return creating;
+	}
+	
+	AnchorPane getHostPane() {
+		return hostPane;
+	}
+	
+	ImageView getImagePane() {
+		return imagePane;
+	}
+	
+	Annotation getCurrAnnotation() {
+		return currAnnotation;
+	}
 		
-	public TestController() {		
+	public TestController() {	
 		this.annotations = new ArrayList<>();
 		
 		this.fc = new FileChooser();
@@ -82,7 +101,7 @@ public class TestController {
 		commentField.setEditable(bool);
 	}
 	
-	private void setCurrAnnotation(Annotation a) {
+	void setCurrAnnotation(Annotation a) {
 		if(currAnnotation != null) {
 			currAnnotation.setStroke(Paint.valueOf("black"));
 			commentField.setText("");
@@ -114,6 +133,34 @@ public class TestController {
 		}
 		
 	};
+	
+	EventHandler<WindowEvent> exitHandler = e -> exitHelper(e);
+	
+	void exitHelper(WindowEvent event) {
+		event.consume();
+		Alert pu = new Alert(AlertType.CONFIRMATION);
+		pu.setTitle("Exit");
+		pu.setHeaderText("Do you wish to save before exiting?");
+		
+		ButtonType saveClose = new ButtonType("Save");
+		ButtonType nosaveClose = new ButtonType("Don't Save");
+		ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		
+		pu.getButtonTypes().setAll(saveClose, nosaveClose, cancel);
+		
+		ButtonType result = pu.showAndWait().orElse(ButtonType.CANCEL);
+		if (result == saveClose) {
+			saveAnnotationstoDisk();
+			Platform.exit();
+		}
+		else if (result == nosaveClose) {
+			Platform.exit();
+		}
+		else {
+			pu.close();
+		}
+	}
+
 	
 	@FXML public void initialize() {
 	
@@ -191,7 +238,7 @@ public class TestController {
 		deleteChangesButton.setDisable(true);
 	}
 	
-	private void saveAnnotationstoDisk() {
+	void saveAnnotationstoDisk() {
 		//file name will be imagefilename_creationdate.csv
 		if(imageData != null && imageFile != null) {
 			
@@ -219,7 +266,7 @@ public class TestController {
 		}
 	}
 	
-	private void loadAnnotationsfromDisk() {
+	void loadAnnotationsfromDisk() {
 		Path imagePath = Paths.get(imageFile.getAbsolutePath());
 		BasicFileAttributes attr;
 		try {
@@ -255,7 +302,8 @@ public class TestController {
 		}
 	}
 	
-	private void clearCurrData(Annotation[] alist) {
+	//removes the contents of alist from the annotations list
+	void clearCurrData(Annotation[] alist) {
 		for(Annotation a : alist) {
 			hostPane.getChildren().remove(a);
 			annotations.remove(a);
@@ -264,26 +312,26 @@ public class TestController {
 		commentField.setText("");
 	}
 	
-	@FXML private void saveChanges(ActionEvent ae) {
+	@FXML void saveChanges() {
 		//go through all annotations and save them as individual text files to internal directory
 		saveAnnotationstoDisk();
 	}
 	
-	@FXML private void discardChanges(ActionEvent ae) {
+	@FXML void discardChanges() {
 		Annotation[] alist = new Annotation[annotations.size()];
 		alist = annotations.toArray(alist);
 		clearCurrData(alist);
 		loadAnnotationsfromDisk();
 	}
 	
-	@FXML private void createAnnotation(ActionEvent ae) {
+	@FXML void createAnnotation() {
 		createAnnoButton.setDisable(true);
 		toggleButtons(true);
 		setCurrAnnotation(null);
 		creating = true;
 	}
 	
-	@FXML private void saveAnnotation(ActionEvent ae) {
+	@FXML void saveAnnotation() {
 		createAnnoButton.setDisable(false);
 		if(currAnnotation != null) {
 			currAnnotation.comment = commentField.getText();
@@ -294,7 +342,7 @@ public class TestController {
 		deleteAnnoButton.setDisable(false);
 	}
 	
-	@FXML private void deleteAnnotation(ActionEvent ae) {
+	@FXML void deleteAnnotation() {
 		createAnnoButton.setDisable(false);
 		commentField.setText("");
 		Annotation[] alist = new Annotation[0];
@@ -306,35 +354,11 @@ public class TestController {
 		toggleButtons(false);
 	}
 	
-	@FXML private void loadImage(ActionEvent ae) throws FileNotFoundException {
+	@FXML void loadImage() throws FileNotFoundException {
 		
 		if(first) {
 			first = false;
-			App.getPrimaryStage().setOnCloseRequest(event -> {
-				event.consume();
-				Alert pu = new Alert(AlertType.CONFIRMATION);
-				pu.setTitle("Exit");
-				pu.setHeaderText("Do you wish to save before exiting?");
-				
-				ButtonType saveClose = new ButtonType("Save");
-				ButtonType nosaveClose = new ButtonType("Don't Save");
-				ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-				
-				pu.getButtonTypes().setAll(saveClose, nosaveClose, cancel);
-				
-				ButtonType result = pu.showAndWait().get();
-				if (result == saveClose) {
-					saveAnnotationstoDisk();
-					Platform.exit();
-				}
-				else if (result == nosaveClose) {
-					Platform.exit();
-				}
-				else {
-					pu.hide();
-				}
-				
-			});
+			App.getPrimaryStage().setOnCloseRequest(exitHandler);
 			
 			createAnnoButton.setDisable(false);
 			saveChangesButton.setDisable(false);
@@ -356,6 +380,9 @@ public class TestController {
 			
 			clip = new Rectangle(imagePane.getFitWidth(), imagePane.getFitHeight());
 			hostPane.setClip(clip);
+		} else {
+			App.getPrimaryStage().setOnCloseRequest(null);
 		}
 	}
+	
 }

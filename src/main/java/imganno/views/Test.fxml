@@ -66,7 +66,7 @@
                         <Insets top="5.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#loadImage" text="Load Image">
+                  <Button fx:id="loadImageButton" mnemonicParsing="false" onAction="#loadImage" text="Load Image">
                      <VBox.margin>
                         <Insets top="150.0" />
                      </VBox.margin>

@@ -18,12 +18,12 @@ public class TestImageData {
 		Image i = Mockito.mock(Image.class);
 		ImageData id = Mockito.spy(new ImageData(f, i));
 		
-		when(id.getWidth()).thenReturn(10);
-		when(id.getHeight()).thenReturn(20);
+		when(id.getWidth()).thenReturn(10.0);
+		when(id.getHeight()).thenReturn(20.0);
 		
 		assertEquals(id.getImage(), i);
-		assertEquals(id.getWidth(), 10);
-		assertEquals(id.getHeight(), 20);
+		assertEquals(id.getWidth(), 10.0);
+		assertEquals(id.getHeight(), 20.0);
 	}
 
 }

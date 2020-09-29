@@ -193,6 +193,11 @@ public class TestController {
 //					});
 					setCurrAnnotation(a);
 				}
+				// or we're deselecting an annotation
+				else {
+					setCurrAnnotation(null);
+					event.consume();
+				}
 			}
 			
 		});

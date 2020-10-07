@@ -251,9 +251,15 @@ public class TestController {
 			BasicFileAttributes attr;
 			try {
 				attr = Files.readAttributes(imagePath, BasicFileAttributes.class);
-				File dir = new File("image_data/");
+				File dir = new File("image_data");
 				dir.mkdir();
-				File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), attr.creationTime()));
+				dir.setWritable(true);
+				String ct = attr.creationTime().toString().replaceAll("[<>:\"/\\|?*]", "");
+				File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), ct));
+				if(!f.exists()) {
+					f.createNewFile();
+					f.setWritable(true);
+				}
 				//System.out.println(f.getAbsolutePath());
 				
 				FileWriter fw = new FileWriter(f);
@@ -276,7 +282,8 @@ public class TestController {
 		BasicFileAttributes attr;
 		try {
 			attr = Files.readAttributes(imagePath, BasicFileAttributes.class);
-			File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), attr.creationTime()));
+			String ct = attr.creationTime().toString().replaceAll("[<>:\"/\\|?*]", "");
+			File f = new File(String.format("image_data/%s_%s.csv", imageFile.getName(), ct));
 
 			if(f.exists()) {
 				Scanner s = new Scanner(f);
